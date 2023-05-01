@@ -61,7 +61,7 @@ fn target_scrypt_work_factor() -> u8 {
         }
     };
 
-    duration
+    let wf = duration
         .map(|mut d| {
             // Use duration as a proxy for CPU usage, which scales linearly with N.
             while d < ONE_SECOND && log_n < 63 {
@@ -73,7 +73,13 @@ fn target_scrypt_work_factor() -> u8 {
         .unwrap_or({
             // Couldn't measure, so guess. This is roughly 1 second on a modern machine.
             18
-        })
+        });
+    if wf > 14 {
+        14
+    } else {
+        wf
+    }
+
 }
 
 pub(crate) struct Recipient {

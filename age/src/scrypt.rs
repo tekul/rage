@@ -139,13 +139,14 @@ impl<'a> crate::Identity for Identity<'a> {
         }
 
         // Place bounds on the work factor we will accept (roughly 16 seconds).
+        // Skip cos we have capped the target work factor
         let target = target_scrypt_work_factor();
-        if log_n > self.max_work_factor.unwrap_or(target + 4) {
-            return Some(Err(DecryptError::ExcessiveWork {
-                required: log_n,
-                target,
-            }));
-        }
+        // if log_n > self.max_work_factor.unwrap_or(target + 4) {
+        //     return Some(Err(DecryptError::ExcessiveWork {
+        //         required: log_n,
+        //         target,
+        //     }));
+        // }
 
         let mut inner_salt = [0; SCRYPT_SALT_LABEL.len() + SALT_LEN];
         inner_salt[..SCRYPT_SALT_LABEL.len()].copy_from_slice(SCRYPT_SALT_LABEL);

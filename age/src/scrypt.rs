@@ -74,8 +74,8 @@ fn target_scrypt_work_factor() -> u8 {
             // Couldn't measure, so guess. This is roughly 1 second on a modern machine.
             18
         });
-    if wf > 14 {
-        14
+    if wf > 13 {
+        13
     } else {
         wf
     }

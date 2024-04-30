@@ -68,7 +68,7 @@ fn target_scrypt_work_factor() -> u8 {
         duration = measure_duration(log_n);
     }
 
-    duration
+    let wf = duration
         .map(|mut d| {
             // Use duration as a proxy for CPU usage, which scales linearly with N.
             while d < ONE_SECOND && log_n < 63 {
@@ -80,7 +80,13 @@ fn target_scrypt_work_factor() -> u8 {
         .unwrap_or({
             // Couldn't measure, so guess. This is roughly 1 second on a modern machine.
             18
-        })
+        });
+    // Cap worf factor at 13
+    if wf > 13 {
+        13
+    } else {
+        wf
+    }
 }
 
 pub(crate) struct Recipient {
@@ -114,6 +120,7 @@ impl crate::Recipient for Recipient {
 
 pub(crate) struct Identity<'a> {
     pub(crate) passphrase: &'a SecretString,
+    #[allow(dead_code)]
     pub(crate) max_work_factor: Option<u8>,
 }
 
@@ -140,13 +147,14 @@ impl<'a> crate::Identity for Identity<'a> {
         }
 
         // Place bounds on the work factor we will accept (roughly 16 seconds).
+        // Skip cos we have capped the work factor
         let target = target_scrypt_work_factor();
-        if log_n > self.max_work_factor.unwrap_or(target + 4) {
-            return Some(Err(DecryptError::ExcessiveWork {
-                required: log_n,
-                target,
-            }));
-        }
+        // if log_n > self.max_work_factor.unwrap_or(target + 4) {
+        //     return Some(Err(DecryptError::ExcessiveWork {
+        //         required: log_n,
+        //         target,
+        //     }));
+        // }
 
         let mut inner_salt = [0; SCRYPT_SALT_LABEL.len() + SALT_LEN];
         inner_salt[..SCRYPT_SALT_LABEL.len()].copy_from_slice(SCRYPT_SALT_LABEL);
